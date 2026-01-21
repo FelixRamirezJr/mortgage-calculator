@@ -119,7 +119,7 @@ function displayResults(results, inputs = null) {
   
   // Show lot fees note if lot fees are included
   if (inputs && inputs.lotFees > 0) {
-    lotFeesNote.textContent = '(includes lot fees)';
+    lotFeesNote.textContent = '(includes fees)';
   } else {
     lotFeesNote.textContent = '';
   }
