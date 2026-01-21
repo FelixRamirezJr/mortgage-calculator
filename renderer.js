@@ -60,9 +60,10 @@ function formatCurrency(amount) {
  * @param {number} interestRate 
  * @param {number} loanAmount 
  * @param {number} loanDuration 
+ * @param {number} lotFees 
  * @returns {string|null} - Error message or null if valid
  */
-function validateInputs(interestRate, loanAmount, loanDuration) {
+function validateInputs(interestRate, loanAmount, loanDuration, lotFees) {
   if (isNaN(interestRate) || interestRate < 0) {
     return 'Please enter a valid interest rate (0 or greater)';
   }
@@ -74,6 +75,9 @@ function validateInputs(interestRate, loanAmount, loanDuration) {
   }
   if (interestRate > 100) {
     return 'Interest rate seems too high. Please enter a rate between 0 and 100%';
+  }
+  if (isNaN(lotFees) || lotFees < 0) {
+    return 'Please enter a valid lot fees amount (0 or greater)';
   }
   return null;
 }
@@ -107,10 +111,18 @@ function hideError() {
 function displayResults(results, inputs = null) {
   const resultsElement = document.getElementById('results');
   const addToComparisonBtn = document.getElementById('addToComparisonBtn');
+  const lotFeesNote = document.getElementById('lotFeesNote');
   
   document.getElementById('monthlyPayment').textContent = formatCurrency(results.monthlyPayment);
   document.getElementById('totalInterest').textContent = formatCurrency(results.totalInterest);
   document.getElementById('totalAmount').textContent = formatCurrency(results.totalAmount);
+  
+  // Show lot fees note if lot fees are included
+  if (inputs && inputs.lotFees > 0) {
+    lotFeesNote.textContent = '(includes lot fees)';
+  } else {
+    lotFeesNote.textContent = '';
+  }
   
   resultsElement.classList.add('visible');
   
@@ -131,17 +143,36 @@ function handleCalculate() {
   const interestRate = parseFloat(document.getElementById('interestRate').value);
   const loanAmount = parseFormattedNumber(document.getElementById('loanAmount').value);
   const loanDuration = parseInt(document.getElementById('loanDuration').value, 10);
+  const lotFeesInput = document.getElementById('lotFees').value.trim();
+  const lotFees = lotFeesInput === '' ? 0 : parseFormattedNumber(lotFeesInput);
   
   // Validate inputs
-  const error = validateInputs(interestRate, loanAmount, loanDuration);
+  const error = validateInputs(interestRate, loanAmount, loanDuration, lotFees);
   if (error) {
     showError(error);
     return;
   }
   
-  // Calculate and display results
-  const results = calculateMortgage(loanAmount, interestRate, loanDuration);
-  const inputs = { interestRate, loanAmount, loanDuration };
+  // Calculate mortgage (base monthly payment)
+  const mortgageResults = calculateMortgage(loanAmount, interestRate, loanDuration);
+  
+  // Add lot fees to monthly payment (for display)
+  const monthlyPaymentWithLotFees = mortgageResults.monthlyPayment + lotFees;
+  
+  // Calculate totals
+  const numberOfPayments = loanDuration * 12;
+  // Total interest is based on mortgage payments only (excluding lot fees)
+  const totalInterest = mortgageResults.totalInterest;
+  // Total amount includes lot fees
+  const totalAmount = monthlyPaymentWithLotFees * numberOfPayments;
+  
+  const results = {
+    monthlyPayment: monthlyPaymentWithLotFees,
+    totalInterest,
+    totalAmount
+  };
+  
+  const inputs = { interestRate, loanAmount, loanDuration, lotFees };
   displayResults(results, inputs);
 }
 
@@ -212,9 +243,20 @@ function addToComparison() {
   const interestRate = inputs.interestRate;
   const loanAmount = inputs.loanAmount;
   const loanDuration = inputs.loanDuration;
+  const lotFees = inputs.lotFees || 0;
   
-  // Calculate results
-  const results = calculateMortgage(loanAmount, interestRate, loanDuration);
+  // Calculate mortgage (base monthly payment)
+  const mortgageResults = calculateMortgage(loanAmount, interestRate, loanDuration);
+  
+  // Add lot fees to monthly payment (for display)
+  const monthlyPaymentWithLotFees = mortgageResults.monthlyPayment + lotFees;
+  
+  // Calculate totals
+  const numberOfPayments = loanDuration * 12;
+  // Total interest is based on mortgage payments only (excluding lot fees)
+  const totalInterest = mortgageResults.totalInterest;
+  // Total amount includes lot fees
+  const totalAmount = monthlyPaymentWithLotFees * numberOfPayments;
   
   // Create comparison entry
   const entry = {
@@ -222,9 +264,10 @@ function addToComparison() {
     interestRate,
     loanAmount,
     loanDuration,
-    monthlyPayment: results.monthlyPayment,
-    totalInterest: results.totalInterest,
-    totalAmount: results.totalAmount
+    lotFees,
+    monthlyPayment: monthlyPaymentWithLotFees,
+    totalInterest,
+    totalAmount
   };
   
   // Add to comparison array
@@ -274,7 +317,7 @@ function updateComparisonDisplay() {
       <td>${entry.loanDuration} ${entry.loanDuration === 1 ? 'year' : 'years'}</td>
       <td class="highlight">${formatCurrency(entry.monthlyPayment)}</td>
       <td class="highlight">${formatCurrency(entry.totalInterest)}</td>
-      <td>${formatCurrency(entry.totalAmount)}</td>
+      <td class="total">${formatCurrency(entry.totalAmount)}</td>
       <td style="text-align: center;">
         <button class="remove-btn" data-id="${entry.id}">Remove</button>
       </td>

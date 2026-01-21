@@ -418,6 +418,11 @@
       font-weight: 600;
     }
 
+    .comparison-table .total {
+      color: var(--success);
+      font-weight: 600;
+    }
+
     .comparison-table .remove-btn {
       background: rgba(239, 68, 68, 0.1);
       border: 1px solid var(--error);
@@ -518,13 +523,21 @@
         </div>
       </div>
 
+      <div class="input-group">
+        <label for="lotFees">Lot Fees <span style="color: var(--text-muted); font-weight: normal;">(Optional)</span></label>
+        <div class="input-wrapper has-prefix">
+          <span class="prefix">$</span>
+          <input type="text" id="lotFees" placeholder="0" inputmode="numeric">
+        </div>
+      </div>
+
       <button class="btn" id="calculateBtn">Calculate</button>
 
       <div class="error-message" id="errorMessage"></div>
 
       <div class="results" id="results">
         <div class="result-item">
-          <span class="label">Monthly Payment</span>
+          <span class="label">Monthly Payment <span id="lotFeesNote" style="color: var(--text-muted); font-size: 0.75rem; font-weight: normal;"></span></span>
           <span class="value" id="monthlyPayment">$0.00</span>
         </div>
         <div class="result-item highlight">
