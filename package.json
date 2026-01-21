@@ -1,0 +1,59 @@
+{
+  "name": "mortgage-calc",
+  "version": "1.0.0",
+  "description": "Calculate total interest paid over the life of a mortgage loan",
+  "main": "main.js",
+  "scripts": {
+    "start": "npx electron .",
+    "build": "electron-builder",
+    "build:mac": "electron-builder --mac",
+    "build:win": "electron-builder --win",
+    "build:linux": "electron-builder --linux",
+    "dist": "electron-builder --publish=never",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [
+    "mortgage",
+    "calculator",
+    "electron"
+  ],
+  "author": "",
+  "license": "ISC",
+  "type": "commonjs",
+  "build": {
+    "appId": "com.mortgagecalc.app",
+    "productName": "Felix's Mortgage Calculator",
+    "directories": {
+      "output": "dist"
+    },
+    "files": [
+      "main.js",
+      "index.html",
+      "renderer.js",
+      "package.json"
+    ],
+    "mac": {
+      "category": "public.app-category.finance",
+      "target": [
+        "dmg",
+        "zip"
+      ]
+    },
+    "win": {
+      "target": [
+        "nsis",
+        "portable"
+      ]
+    },
+    "linux": {
+      "target": [
+        "AppImage",
+        "deb"
+      ]
+    }
+  },
+  "devDependencies": {
+    "electron": "^40.0.0",
+    "electron-builder": "^24.13.3"
+  }
+}
